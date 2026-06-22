@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Joke Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
+      padding: 50px 40px;
+      text-align: center;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 42px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-category {
+      background: #e3f2fd;
+      color: #1976d2;
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+
+    .btn-category:hover {
+      background: #bbdefb;
+    }
+
+    .btn-category.active {
+      background: #1976d2;
+      color: white;
+    }
+
+    .joke-box {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      padding: 30px;
+      margin: 30px 0;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .joke-text {
+      font-size: 20px;
+      color: #333;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .joke-source {
+      font-size: 12px;
+      color: #999;
+      font-style: italic;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #c62828;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #2e7d32;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .stat-box {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    .categories-section {
+      margin: 30px 0;
+      text-align: left;
+    }
+
+    .categories-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .emoji {
+      font-size: 50px;
+      margin-bottom: 10px;
+    }
+
+    .batch-jokes {
+      margin: 20px 0;
+    }
+
+    .batch-joke-item {
+      background: #f9f9f9;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      text-align: left;
+    }
+
+    .batch-joke-number {
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .batch-joke-text {
+      color: #333;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .joke-text {
+        font-size: 16px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="emoji">😂</div>
+    <h1>Joke Generator</h1>
+    <p class="subtitle">Get random jokes from multiple APIs</p>
+
+    <!-- Error and Success Messages -->
+    <div id="message" class="hidden"></div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-number" id="jokeCount">0</div>
+        <div class="stat-label">Jokes Loaded</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="categoryCount">0</div>
+        <div class="stat-label">Current Category</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="lastUpdate">-</div>
+        <div class="stat-label">Last Update</div>
+      </div>
+    </div>
+
+    <!-- Categories Section -->
+    <div class="categories-section">
+      <div class="categories-title">📂 Select Category:</div>
+      <div class="categories-grid" id="categoriesContainer"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn-primary" onclick="getRandomJoke()">Get Joke</button>
+      <button class="btn-secondary" onclick="getCategoryJoke('official')">Official</button>
+      <button class="btn-secondary" onclick="getCategoryJoke('jokeapi')">JokeAPI</button>
+      <button class="btn-secondary" onclick="getCategoryJoke('programming')">Programming</button>
+      <button class="btn-secondary" onclick="getCategoryJoke('dad')">Dad Jokes</button>
+      <button class="btn-secondary" onclick="getCategoryJoke('fact')">Fun Facts</button>
+    </div>
+
+    <!-- Batch Jokes Control -->
+    <div style="margin-bottom: 20px;">
+      <button class="btn-primary" onclick="getBatchJokes()" style="margin-right: 10px;">Get 5 Jokes</button>
+      <button class="btn-secondary" onclick="clearBatchJokes()">Clear</button>
+    </div>
+
+    <!-- Main Joke Display -->
+    <div class="joke-box" id="jokeBox">
+      <p style="color: #999;">Click a button to get started!</p>
+    </div>
+
+    <!-- Batch Jokes Display -->
+    <div class="batch-jokes hidden" id="batchJokesContainer">
+      <h3 style="margin-bottom: 15px; color: #333;">📚 Batch Jokes:</h3>
+      <div id="batchJokesContent"></div>
+    </div>
+  </div>
+
+  <script>
+    let jokeCount = 0;
+    let currentCategory = 'Random';
+    const API_URL = 'http://localhost:5000/api';
+
+    async function loadCategories() {
+      try {
+        const response = await fetch(`${API_URL}/jokes/categories`);
+        const data = await response.json();
+        const container = document.getElementById('categoriesContainer');
+        container.innerHTML = '';
+
+        data.categories.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'btn-category';
+          btn.textContent = cat.name;
+          btn.onclick = () => getCategoryJoke(cat.name.toLowerCase().replace(' ', ''));
+          container.appendChild(btn);
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+
+    async function getRandomJoke() {
+      try {
+        document.getElementById('jokeBox').innerHTML = '<div class="loading"></div>';
+        document.getElementById('categoryCount').textContent = 'Random';
+        currentCategory = 'Random';
+
+        const response = await fetch(`${API_URL}/joke/random`);
+        const data = await response.json();
+
+        if (data.success) {
+          displayJoke(data);
+          showMessage('✅ Joke loaded successfully!', 'success');
+        } else {
+          showMessage('❌ Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('❌ Error: ' + error.message, 'error');
+      }
+    }
+
+    async function getCategoryJoke(category) {
+      try {
+        document.getElementById('jokeBox').innerHTML = '<div class="loading"></div>';
+        document.getElementById('categoryCount').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        currentCategory = category;
+
+        const response = await fetch(`${API_URL}/joke/${category}`);
+        const data = await response.json();
+
+        if (data.success) {
+          displayJoke(data);
+          showMessage('✅ Joke loaded successfully!', 'success');
+        } else {
+          showMessage('❌ Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('❌ Error: ' + error.message, 'error');
+      }
+    }
+
+    function displayJoke(data) {
+      jokeCount++;
+      document.getElementById('jokeCount').textContent = jokeCount;
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+      const jokeBox = document.getElementById('jokeBox');
+      jokeBox.innerHTML = `
+        <div style="width: 100%;">
+          <p class="joke-text">"${data.joke}"</p>
+          <p class="joke-source">Source: ${data.source}</p>
+        </div>
+      `;
+    }
+
+    async function getBatchJokes() {
+      try {
+        document.getElementById('batchJokesContent').innerHTML = '<div class="loading"></div>';
+        document.getElementById('batchJokesContainer').classList.remove('hidden');
+
+        const response = await fetch(`${API_URL}/jokes/batch?count=5`);
+        const data = await response.json();
+
+        if (data.success) {
+          let html = '';
+          data.jokes.forEach((joke, index) => {
+            html += `
+              <div class="batch-joke-item">
+                <div class="batch-joke-number">Joke ${index + 1}</div>
+                <div class="batch-joke-text">"${joke.joke}"</div>
+                <p class="joke-source">Source: ${joke.source}</p>
+              </div>
+            `;
+          });
+          document.getElementById('batchJokesContent').innerHTML = html;
+          showMessage(`✅ Loaded ${data.count} jokes!`, 'success');
+        } else {
+          showMessage('❌ Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('❌ Error: ' + error.message, 'error');
+      }
+    }
+
+    function clearBatchJokes() {
+      document.getElementById('batchJokesContainer').classList.add('hidden');
+      document.getElementById('batchJokesContent').innerHTML = '';
+    }
+
+    function showMessage(message, type) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = message;
+      messageEl.className = type === 'error' ? 'error' : 'success';
+      messageEl.classList.remove('hidden');
+
+      setTimeout(() => {
+        messageEl.classList.add('hidden');
+      }, 4000);
+    }
+
+    // Load categories on page load
+    window.addEventListener('load', () => {
+      loadCategories();
+      // Auto-load first joke
+      setTimeout(getRandomJoke, 500);
+    });
+  </script>
+</body>
+</html>
